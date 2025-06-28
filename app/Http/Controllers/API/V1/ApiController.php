@@ -110,7 +110,11 @@ class ApiController extends Controller
 	        $domain->save();
 
 	        DB::commit();
-	        return response()->json(['status'=>true, 'domain_id'=>intval($domain->id), 'message'=>'Successfully a shop has been added']);
+	        return response()->json([
+                'status' => true,
+                'domain' => $domain->domain,
+                'message' => 'Successfully a shop has been added'
+            ]);
 
     	}catch(Exception $e){
     		DB::rollback();
