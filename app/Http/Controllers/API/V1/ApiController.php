@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Http\Request;
 use App\Models\Domain;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Validator;
 use DB;
 use Illuminate\Support\Facades\File;
@@ -22,10 +24,10 @@ use App\Models\Referlog;
 use App\Models\Setting;
 
 class ApiController extends Controller
-{  
+{
 
     public function saveDomain(Request $request)
-    {   
+    {
     	DB::beginTransaction();
     	try
     	{
@@ -45,10 +47,10 @@ class ApiController extends Controller
 	        if ($validator->fails()) {
 	        	DB::commit();
 	            return response()->json([
-	                'status' => false, 
-	                'message' => 'The given data was invalid', 
+	                'status' => false,
+	                'message' => 'The given data was invalid',
 	                'data' => $validator->errors()
-	            ], 422);  
+	            ], 422);
 	        }
 
 	        //$user = User::where('phone',$request->phone)->first();
@@ -56,28 +58,28 @@ class ApiController extends Controller
 	        $checkDomain = Domain::where('domain',$request->domain)->first();
 
 	        if($checkDomain)
-	        {   
+	        {
 	        	DB::commit();
 	        	return response()->json(['status'=>false, 'domain_id'=>0, 'message'=>'The domain is not available'],400);
 	        }
 
 	        $shop_slug = str_replace(" ", "_", $request->shop_name);
- 
+
 	        if($request->file('image'))
-	        {   
+	        {
 	            $file = $request->file('image');
 	            $name = time().$shop_slug.$file->getClientOriginalName();
-	            $file->move(public_path().'/uploads/users/', $name); 
+	            $file->move(public_path().'/uploads/users/', $name);
 	            $pathImg = 'uploads/users/'.$name;
 	        }else{
 	        	$pathImg = "defaults/profile.png";
 	        }
 
 	        if($request->file('logo'))
-	        {   
+	        {
 	            $file = $request->file('logo');
 	            $name = time().$shop_slug.$file->getClientOriginalName();
-	            $file->move(public_path().'/uploads/shops/', $name); 
+	            $file->move(public_path().'/uploads/shops/', $name);
 	            $pathLogo = 'uploads/shops/'.$name;
 	        }else{
 	        	$pathLogo = NULL;
@@ -137,11 +139,11 @@ class ApiController extends Controller
 
 	        if ($validator->fails()) {
 	            return response()->json([
-	                'status' => false, 
-	                'message' => 'The given data was invalid', 
+	                'status' => false,
+	                'message' => 'The given data was invalid',
 	                'data' => $validator->errors()
-	            ], 422);  
-	        } 
+	            ], 422);
+	        }
 
 
 	        $domain = Domain::with('theme')->where('domain',$request->domain)->first();
@@ -165,10 +167,10 @@ class ApiController extends Controller
 
 	        if ($validator->fails()) {
 	            return response()->json([
-	                'status' => false, 
-	                'message' => 'The given data was invalid', 
+	                'status' => false,
+	                'message' => 'The given data was invalid',
 	                'data' => $validator->errors()
-	            ], 422);  
+	            ], 422);
 	        }
 
 	        $domain = domainDetails($request);
@@ -192,10 +194,10 @@ class ApiController extends Controller
 
 	        if ($validator->fails()) {
 	            return response()->json([
-	                'status' => false, 
-	                'message' => 'The given data was invalid', 
+	                'status' => false,
+	                'message' => 'The given data was invalid',
 	                'data' => $validator->errors()
-	            ], 422);  
+	            ], 422);
 	        }
 
 	        $domain = domainDetails($request);
@@ -219,10 +221,10 @@ class ApiController extends Controller
 
 	        if ($validator->fails()) {
 	            return response()->json([
-	                'status' => false, 
-	                'message' => 'The given data was invalid', 
+	                'status' => false,
+	                'message' => 'The given data was invalid',
 	                'data' => $validator->errors()
-	            ], 422);  
+	            ], 422);
 	        }
 
 	        $domain = domainDetails($request);
@@ -246,10 +248,10 @@ class ApiController extends Controller
 
 	        if ($validator->fails()) {
 	            return response()->json([
-	                'status' => false, 
-	                'message' => 'The given data was invalid', 
+	                'status' => false,
+	                'message' => 'The given data was invalid',
 	                'data' => $validator->errors()
-	            ], 422);  
+	            ], 422);
 	        }
 
 	        $domain = domainDetails($request);
@@ -266,7 +268,7 @@ class ApiController extends Controller
     }
 
     public function saveOrder(Request $request)
-	{   
+	{
 	    DB::beginTransaction();
 	    try
 	    {
@@ -281,16 +283,16 @@ class ApiController extends Controller
 	            'total' => 'required|numeric',
 	            'orders' => 'required|array|min:1',
 	            'refer_code' => 'nullable|string|exists:users,refer_code',
-	            'delivery_charge' => 'nullable|numeric', 
+	            'delivery_charge' => 'nullable|numeric',
 	        ]);
 
 	        if ($validator->fails()) {
 	            DB::commit();
 	            return response()->json([
-	                'status' => false, 
-	                'message' => 'The given data was invalid', 
+	                'status' => false,
+	                'message' => 'The given data was invalid',
 	                'data' => $validator->errors()
-	            ], 422);  
+	            ], 422);
 	        }
 
 	        $domain = domainDetails($request);
@@ -315,7 +317,7 @@ class ApiController extends Controller
 	            $order->qty = $item['qty'];
 	            $order->unit_total = $item['unit_total'];
 	            $order->save();
-	        } 
+	        }
 
 	        if($request->has('refer_code'))
 	        {
@@ -354,15 +356,15 @@ class ApiController extends Controller
 
 	        if ($validator->fails()) {
 	            return response()->json([
-	                'status' => false, 
-	                'message' => 'The given data was invalid', 
+	                'status' => false,
+	                'message' => 'The given data was invalid',
 	                'data' => $validator->errors()
-	            ], 422);  
+	            ], 422);
 	        }
 
 	        $order = Orderdetail::findorfail($request->order_id);
 	        $orderData = [
-			    'invoice' => '123456', 
+			    'invoice' => '123456',
 			    'recipient_name' => 'John Doe',
 			    'recipient_phone' => '01234567890',
 			    'recipient_address' => 'Fla# A1,House# 17/1, Road# 3/A, Dhanmondi,Dhaka-1209',
@@ -396,10 +398,10 @@ class ApiController extends Controller
 
 	        if ($validator->fails()) {
 	            return response()->json([
-	                'status' => false, 
-	                'message' => 'The given data was invalid', 
+	                'status' => false,
+	                'message' => 'The given data was invalid',
 	                'data' => $validator->errors()
-	            ], 422);   
+	            ], 422);
 	        }
 
 	        $user = new User();
@@ -430,10 +432,10 @@ class ApiController extends Controller
 
 	        if ($validator->fails()) {
 	            return response()->json([
-	                'status' => false, 
-	                'message' => 'The given data was invalid', 
+	                'status' => false,
+	                'message' => 'The given data was invalid',
 	                'data' => $validator->errors()
-	            ], 422);   
+	            ], 422);
 	        }
 
 	        $search = $request->domain;
@@ -451,7 +453,7 @@ class ApiController extends Controller
 	        ], 500);
 	    }
 	}
-	
+
 	public function packages()
 	{
 	    try
@@ -474,7 +476,7 @@ class ApiController extends Controller
 	        ], 500);
 	    }
 	}
-	
+
 	public function privacyPolicy(Request $request)
 	{
 		try
@@ -485,10 +487,10 @@ class ApiController extends Controller
 
 	        if ($validator->fails()) {
 	            return response()->json([
-	                'status' => false, 
-	                'message' => 'The given data was invalid', 
+	                'status' => false,
+	                'message' => 'The given data was invalid',
 	                'data' => $validator->errors()
-	            ], 422);   
+	            ], 422);
 	        }
 
 	        $domain = Domain::where('domain',$request->domain)->first();
@@ -503,7 +505,7 @@ class ApiController extends Controller
 	        ], 500);
 	    }
 	}
-	
+
 	public function contactUs(Request $request)
 	{
 		try
@@ -514,10 +516,10 @@ class ApiController extends Controller
 
 	        if ($validator->fails()) {
 	            return response()->json([
-	                'status' => false, 
-	                'message' => 'The given data was invalid', 
+	                'status' => false,
+	                'message' => 'The given data was invalid',
 	                'data' => $validator->errors()
-	            ], 422);   
+	            ], 422);
 	        }
 
 	        $domain = Domain::where('domain',$request->domain)->first();
@@ -532,7 +534,7 @@ class ApiController extends Controller
 	        ], 500);
 	    }
 	}
-	
+
 	public function aboutUs(Request $request)
 	{
 	    try
@@ -543,10 +545,10 @@ class ApiController extends Controller
 
 	        if ($validator->fails()) {
 	            return response()->json([
-	                'status' => false, 
-	                'message' => 'The given data was invalid', 
+	                'status' => false,
+	                'message' => 'The given data was invalid',
 	                'data' => $validator->errors()
-	            ], 422);   
+	            ], 422);
 	        }
 
 	        $domain = Domain::where('domain',$request->domain)->first();
@@ -573,12 +575,12 @@ class ApiController extends Controller
 
 	        if ($validator->fails()) {
 	            return response()->json([
-	                'status' => false, 
-	                'message' => 'The given data was invalid', 
+	                'status' => false,
+	                'message' => 'The given data was invalid',
 	                'data' => $validator->errors()
-	            ], 422);   
+	            ], 422);
 	        }
-	            
+
 	        $user = User::where('role_id',$request->role_id)->first();
 	        $data = Setting::select('privacy_policy','contact_name','contact_phone','contact_email','contact_description','contact_address','about_us')->where('user_id',$user->id)->first();
 	        return response()->json(['status'=>true, 'data'=>$data]);
@@ -591,4 +593,65 @@ class ApiController extends Controller
 	    }
 	}
 
+    public function updateUserTheme(Request $request)
+    {
+        try
+        {
+            $validator = Validator::make($request->all(), [
+                'domain' => 'required|string|exists:domains,domain',
+                'theme' => 'nullable|string|max:191',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'The given data was invalid',
+                    'data' => $validator->errors()
+                ], 422);
+            }
+
+            $domain = $request->get('domain');
+            $theme = $request->get('theme');
+
+            if (empty($theme)) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'No theme provided. Nothing to update.'
+                ]);
+            }
+
+            $domain = Domain::where('domain', $domain)->first(['user_id']);
+
+            $updatedCount = User::where('id', $domain->user_id)
+                ->update(['theme' => $theme]);
+
+            if ($updatedCount > 0) {
+                return response()->json([
+                    'status' => true,
+                    'data' => $domain->user_id,
+                    'message' => 'Theme updated successfully.'
+                ]);
+            }
+
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found or theme was not changed.'
+            ], 404);
+
+        } catch(Exception $e) {
+
+            // Log the error
+            Log::error('Error in updating user theme: ' , [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong!!!'
+            ], 500);
+        }
+    }
 }

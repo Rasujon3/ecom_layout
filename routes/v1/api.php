@@ -35,3 +35,5 @@ Route::post('contact-us', [ApiController::class, 'contactUs']);
 Route::post('about-us', [ApiController::class, 'aboutUs']);
 
 Route::post('admin-info', [ApiController::class, 'adminInfo']);
+
+Route::put('update-user-theme', [ApiController::class, 'updateUserTheme']);
